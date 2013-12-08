@@ -71,7 +71,9 @@
   (loop [prev init
          guess (improve-guess f init)]
     (cond
-      ; backtrack
+      ; guess converged to a division by zero
+      ; this is an error condition
+      ; backtrack and try a different initial value
       (= :zero-derivative guess)
         (recur f (+ init 1.0))
       (good-enough? prev guess)
