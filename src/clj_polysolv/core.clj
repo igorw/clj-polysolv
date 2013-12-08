@@ -127,7 +127,7 @@
         ; general case
         (flatten-results
           (list
-            ; search near first extremum
+            ; search to the left of first extremum
             ;    positive ^3 AND extremum > 0
             ; OR negative ^3 AND extremum < 0
             ; OR positive ^4 AND extremum < 0
@@ -155,7 +155,7 @@
                  (drop-last extrema)
                  (rest extrema))
 
-            ; search near last extremum
+            ; search to the right of last extremum
             ;    positive ^3 AND extremum < 0
             ; OR positive ^4 AND extremum < 0
             ; OR negative ^3 AND extremum > 0
