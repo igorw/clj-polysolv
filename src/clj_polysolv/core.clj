@@ -158,7 +158,7 @@
             ; search near last extremum
             ;    positive ^3 AND extremum < 0
             ; OR positive ^4 AND extremum < 0
-            ;    negative ^3 AND extremum > 0
+            ; OR negative ^3 AND extremum > 0
             ; OR negative ^4 AND extremum > 0
             (when (sign-change? a (poly f last-extremum))
               (newton-guess f (+ last-extremum 1))))))))
