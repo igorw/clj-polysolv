@@ -4,7 +4,8 @@
 
 (defn round [n precision]
   (let [factor (math/expt 10 precision)]
-    (double (/ (Math/round (double (* factor n))) factor))))
+    (double (/ (Math/round (double (* factor n)))
+               factor))))
 
 ; polynomial related functions
 
