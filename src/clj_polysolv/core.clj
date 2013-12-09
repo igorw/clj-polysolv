@@ -2,10 +2,16 @@
   (:require [clojure.math.numeric-tower :as math]
             [clojure.set :as set]))
 
+; math
+
 (defn round [n precision]
   (let [factor (math/expt 10 precision)]
     (double (/ (Math/round (double (* factor n)))
                factor))))
+
+(defn average [coll]
+  (/ (reduce + coll)
+     (count coll)))
 
 ; polynomial related functions
 
@@ -150,7 +156,7 @@
 
                       ; sign changed between x1 and x2
                       (sign-change? (poly f x1) (poly f x2))
-                        (newton-guess f (/ (+ x1 x2) 2.0))))
+                        (newton-guess f (average [x1 x2]))))
                  (range (count extrema))
                  (drop-last extrema)
                  (rest extrema))
