@@ -146,7 +146,10 @@
             ; search in between extrema
             ; pairwise iteration
             (map (fn [x1 x2]
-                    (newton-guess f (average [x1 x2])))
+                    (when (or (zero? (poly f x1))
+                              (zero? (poly f x2))
+                              (sign-change? (poly f x1) (poly f x2)))
+                      (newton-guess f (average [x1 x2]))))
                  (drop-last extrema)
                  (rest extrema))
 
