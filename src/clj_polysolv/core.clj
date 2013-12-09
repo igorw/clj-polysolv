@@ -97,11 +97,46 @@
 (defn sign-change? [a b]
   (not= (pos? a) (pos? b)))
 
-(defn flatten-results [xs]
+(defn flatten-start-values [xs]
   (->> xs
        flatten
        (filter identity)
        set))
+
+(defn detect-start-values [f extrema]
+  (let [power (highest-power f)
+        a (f power)
+        first-extremum (first extrema)
+        last-extremum (last extrema)]
+
+    (flatten-start-values
+      (list
+        ; search to the left of first extremum
+        ;    positive ^3 AND extremum > 0
+        ; OR negative ^3 AND extremum < 0
+        ; OR positive ^4 AND extremum < 0
+        ; OR negative ^4 AND extremum > 0
+        (let [sign-check (if (even? power) sign-change? sign-same?)]
+          (when (sign-check a (poly f first-extremum))
+            (- first-extremum 1)))
+
+        ; search in between extrema
+        ; pairwise iteration
+        (map (fn [x1 x2]
+                (when (or (zero? (poly f x1))
+                          (zero? (poly f x2))
+                          (sign-change? (poly f x1) (poly f x2)))
+                  (average [x1 x2])))
+             (drop-last extrema)
+             (rest extrema))
+
+        ; search to the right of last extremum
+        ;    positive ^3 AND extremum < 0
+        ; OR positive ^4 AND extremum < 0
+        ; OR negative ^3 AND extremum > 0
+        ; OR negative ^4 AND extremum > 0
+        (when (sign-change? a (poly f last-extremum))
+          (+ last-extremum 1))))))
 
 (declare solve)
 
@@ -119,47 +154,16 @@
 (defn newton-roots [f]
   (let [f (normalize f)
         power (highest-power f)
-        a (f power)
         f' (derivative f)
-        extrema (apply sorted-set (solve f'))
-        first-extremum (first extrema)
-        last-extremum (last extrema)]
+        extrema (apply sorted-set (solve f'))]
 
     ; of odd power with no extrema
     ; only one solution possible
     ; search for it
     (if (and (odd? power) (zero? (count extrema)))
         #{(newton-guess f 1.0)}
-
-        ; general case
-        (flatten-results
-          (list
-            ; search to the left of first extremum
-            ;    positive ^3 AND extremum > 0
-            ; OR negative ^3 AND extremum < 0
-            ; OR positive ^4 AND extremum < 0
-            ; OR negative ^4 AND extremum > 0
-            (let [sign-check (if (even? power) sign-change? sign-same?)]
-              (when (sign-check a (poly f first-extremum))
-                (newton-guess f (- first-extremum 1))))
-
-            ; search in between extrema
-            ; pairwise iteration
-            (map (fn [x1 x2]
-                    (when (or (zero? (poly f x1))
-                              (zero? (poly f x2))
-                              (sign-change? (poly f x1) (poly f x2)))
-                      (newton-guess f (average [x1 x2]))))
-                 (drop-last extrema)
-                 (rest extrema))
-
-            ; search to the right of last extremum
-            ;    positive ^3 AND extremum < 0
-            ; OR positive ^4 AND extremum < 0
-            ; OR negative ^3 AND extremum > 0
-            ; OR negative ^4 AND extremum > 0
-            (when (sign-change? a (poly f last-extremum))
-              (newton-guess f (+ last-extremum 1))))))))
+        (set (map (partial newton-guess f)
+                  (detect-start-values f extrema))))))
 
 (defn solve [f]
   (let [power (highest-power f)]
