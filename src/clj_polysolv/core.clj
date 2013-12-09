@@ -68,11 +68,12 @@
   (= (round prev 10) (round guess 10)))
 
 (defn improve-guess [f guess]
-  (let [fx (poly f guess)
-        fax (poly (derivative f) guess)]
-    (if (zero? fax)
+  (let [f' (derivative f)
+        x  (poly f guess)
+        x' (poly f' guess)]
+    (if (zero? x')
       :zero-derivative
-      (- guess (/ fx fax)))))
+      (- guess (/ x x')))))
 
 (defn newton-guess [f init]
   (loop [prev init
@@ -119,8 +120,8 @@
   (let [f (normalize f)
         power (highest-power f)
         a (f power)
-        fa (derivative f)
-        extrema (apply sorted-set (solve fa))
+        f' (derivative f)
+        extrema (apply sorted-set (solve f'))
         first-extremum (first extrema)
         last-extremum (last extrema)]
 
